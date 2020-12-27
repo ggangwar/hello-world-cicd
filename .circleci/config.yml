@@ -53,8 +53,9 @@ jobs:
     docker:
       - image: circleci/node:13.8.0
     steps:
+      - run: return 1
       - run:
-          name: "pipeline failed"
+          name: on error
           command: |
             echo "something failed"
           when: on_fail
