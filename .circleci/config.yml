@@ -8,11 +8,11 @@ orbs:
 commands:
   print_pipeline_id:
     parameters:
-      from:
-        default: "GG"
+      id:
+        default: "123"
         type: string
     steps:
-      - run: echo ${CIRCLE_WORKFLOW_ID}
+      - run: echo "<<parameters.to>>" ${CIRCLE_WORKFLOW_ID}
 jobs:
   print_hello_world:
     docker:
@@ -48,7 +48,12 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - print_pipeline_id:
-          from: "Garima"
+          id: << pipeline.id >>
+      - run:
+          name: "pipeline failed"
+          command: |
+            echo "something failed"
+          when: on_fail
 workflows:
   # Name the workflow "welcome"
   welcome:
