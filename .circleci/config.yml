@@ -70,7 +70,7 @@ jobs:
             aws cloudformation deploy \
               --template-file infra.yml \
               --stack-name cicd-demo-stack
-  configure_infra
+  configure_infra:
     docker:
       - image: python:3.7-alpine3.11
     steps:
