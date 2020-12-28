@@ -108,11 +108,12 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - run: return 1
-      - run:
-          name: destroying
-          command: destroy_infra
-          when: on_fail
+      - run: 
+          name: simulate error
+          command: |
+            return 1
+      - destroy_infra
+        when: on_fail
 
 workflows:
   welcome:
