@@ -112,8 +112,8 @@ jobs:
           name: simulate error
           command: |
             return 1
-      - destroy_infra:
-          when: on_fail
+      - destroy_infra
+        when: on_fail
 
 workflows:
   welcome:
