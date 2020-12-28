@@ -112,8 +112,10 @@ jobs:
           name: simulate error
           command: |
             return 1
-      - destroy_infra
-        when: on_fail
+      - run:
+          name: destroying
+          command: destroy_infra
+          when: on_fail
 
 workflows:
   welcome:
@@ -129,4 +131,6 @@ workflows:
       - create_infrastructure
       #- configure_infra
       #- smoke_test
-      - smoke_test_cf_infra
+      - smoke_test_cf_infra:
+          requires:
+            - create_infrastructure
