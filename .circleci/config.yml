@@ -9,6 +9,12 @@ commands:
         type: string
     steps:
       - run: 'echo "<<parameters.id>>" ${CIRCLE_WORKFLOW_ID}'
+  destroy_infra:
+    steps:
+      - run:
+          name: destroy CF infra
+          command: |
+            aws cloudformation delete-stack --stack-name prod-${CIRCLE_WORKFLOW_ID}
 jobs:
   print_hello_world:
     docker:
@@ -65,7 +71,7 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file infra.yml \
-              --stack-name cicd-demo-stack
+              --stack-name prod-${CIRCLE_WORKFLOW_ID}
   configure_infra:
     docker:
       - image: 'python:3.7-alpine3.11'
@@ -97,6 +103,18 @@ jobs:
               else
                return 1
               fi
+  smoke_test_cf_infra:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: simulate error
+          command: |
+            return 1
+      - destroy_infra:
+          when: on_fail
+
 workflows:
   welcome:
     jobs:
@@ -108,6 +126,7 @@ workflows:
       #   requires:
       #     - save_hello_world_output
       #- print_pipeline_id_command
-      #- create_infrastructure
+      - create_infrastructure
       #- configure_infra
-      - smoke_test
+      #- smoke_test
+      - smoke_test_cf_infra
