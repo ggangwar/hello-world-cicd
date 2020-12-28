@@ -1,11 +1,12 @@
 Resources:
   Ec2Instance:
-    Type: "AWS::EC2::Instance"
+    Type: AWS::EC2::Instance
     Properties:
+      ImageId: ami-0db0b3ab7df22e366
+      InstanceType: t2.micro
+      KeyName: cicd
       SecurityGroups:
         - !Ref InstanceSecurityGroup
-      KeyName: cicd
-      ImageId: "ami-0db0b3ab7df22e366" # you may need to find out what instance types are available in your region - use https://cloud-images.ubuntu.com/locator/ec2/
   InstanceSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
