@@ -1,35 +1,31 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-# Use a package of configuration called an orb.
 orbs:
-  # Declare a dependency on the welcome-orb
   welcome: circleci/welcome-orb@0.4.1
-# Orchestrate or schedule a set of jobs
 commands:
   print_pipeline_id:
     parameters:
       id:
-        default: "123"
+        default: '123'
         type: string
     steps:
-      - run: echo "<<parameters.id>>" ${CIRCLE_WORKFLOW_ID}
+      - run: 'echo "<<parameters.id>>" ${CIRCLE_WORKFLOW_ID}'
 jobs:
   print_hello_world:
     docker:
-      - image: circleci/node:13.8.0
+      - image: 'circleci/node:13.8.0'
     steps:
       - run: echo helloworld
   print_owner:
     docker:
-      - image: circleci/node:13.8.0
+      - image: 'circleci/node:13.8.0'
     steps:
       - run:
-          name: "printing project's owner"
+          name: printing project's owner
           command: |
             echo $owner
   save_hello_world_output:
     docker:
-      - image: circleci/node:13.8.0
+      - image: 'circleci/node:13.8.0'
     steps:
       - run: echo "Hello world" > ~/output.txt
       - persist_to_workspace:
@@ -38,20 +34,20 @@ jobs:
             - output.txt
   print_output_file:
     docker:
-      - image: circleci/node:13.8.0
+      - image: 'circleci/node:13.8.0'
     steps:
       - attach_workspace:
           at: ~/
       - run: cat ~/output.txt
   print_pipeline_id_command:
     docker:
-      - image: circleci/node:13.8.0
+      - image: 'circleci/node:13.8.0'
     steps:
       - print_pipeline_id:
           id: << pipeline.id >>
   handle_failure:
     docker:
-      - image: circleci/node:13.8.0
+      - image: 'circleci/node:13.8.0'
     steps:
       - run: return 0
       - run:
@@ -72,23 +68,22 @@ jobs:
               --stack-name cicd-demo-stack
   configure_infra:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: 'python:3.7-alpine3.11'
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["13:59:17:ea:a4:c6:3a:95:0e:25:22:6f:9a:2e:c9:18"]
+          fingerprints:
+            - '13:59:17:ea:a4:c6:3a:95:0e:25:22:6f:9a:2e:c9:18'
       - run:
           name: install dependencies
           command: |
             apk add --update ansible
-       - run:
+      - run:
           name: Configure server
           command: |
             ansible-playbook -i inventory.txt playbook.yml
 workflows:
-  # Name the workflow "welcome"
   welcome:
-    # Run the welcome/run job in its own container
     jobs:
       - welcome/run
       - print_hello_world
@@ -98,6 +93,4 @@ workflows:
           requires:
             - save_hello_world_output
       - print_pipeline_id_command
-      #- handle_failure
-      #- create_infrastructure
       - configure_infra
