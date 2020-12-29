@@ -109,6 +109,46 @@ jobs:
     steps:
       - checkout
       - destroy_infra
+  create_and_deploy_front_end:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run: |
+          aws cloudformation deploy \
+            --template-file bucket.yml \
+            --stack-name "${CIRCLE_WORKFLOW_ID}" \
+            --parameter-overrides NAME="${CIRCLE_WORKFLOW_ID}"
+      - run: aws s3 sync . s3://"${CIRCLE_WORKFLOW_ID}" --delete
+  get_last_deployment_id:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run: | 
+          aws cloudformation list-exports --query "Exports[?Name==\`PipelineID\`].Value" --no-paginate --output text > ~/lastDeployId.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - lastDeployId.txt
+  promote_to_production:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run: |
+          aws cloudformation deploy --template-file cloudfront.yml --stack-name production-distro --parameter-overrides PipelineID="${CIRCLE_WORKFLOW_ID}"
+  clean_up_old_front_end:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run: PreviousPipelineID = `cat ~/output.txt`
+      - run: |
+          aws s3 rm "s3://${PreviousPipelineID}" --recursive
+          aws cloudformation delete-stack --stack-name "${PreviousPipelineID}"
 
 workflows:
   welcome:
@@ -121,9 +161,17 @@ workflows:
       #   requires:
       #     - save_hello_world_output
       #- print_pipeline_id_command
-      - create_infrastructure
+      #- create_infrastructure
       #- configure_infra
       #- smoke_test
-      - smoke_test_cf_infra:
+      #- smoke_test_cf_infra:
+      #    requires:
+      #     - create_infrastructure
+      - get_last_deployment_id
+      - create_and_deploy_front_end
+      - promote_to_production:
           requires:
-            - create_infrastructure
+            - create_and_deploy_front_end
+      - clean_up_old_front_end:
+          requires:
+            - promote_to_production
