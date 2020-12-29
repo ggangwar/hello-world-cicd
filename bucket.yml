@@ -1,5 +1,5 @@
 Parameters:
-NAME:
+  NAME:
   Type: String
 Resources:
 WebsiteBucket:
