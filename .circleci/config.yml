@@ -117,9 +117,9 @@ jobs:
       - run: |
           aws cloudformation deploy \
             --template-file bucket.yml \
-            --stack-name "${CIRCLE_WORKFLOW_ID}" \
-            --parameter-overrides NAME="${CIRCLE_WORKFLOW_ID}"
-      - run: aws s3 sync . s3://"${CIRCLE_WORKFLOW_ID}" --delete
+            --stack-name "${CIRCLE_WORKFLOW_ID:0:7}" \
+            --parameter-overrides NAME="${CIRCLE_WORKFLOW_ID:0:7}"
+      - run: aws s3 sync . s3://"${CIRCLE_WORKFLOW_ID:0:7}" --delete
   get_last_deployment_id:
     docker:
       - image: amazon/aws-cli
@@ -138,7 +138,7 @@ jobs:
     steps:
       - checkout
       - run: |
-          aws cloudformation deploy --template-file cloudfront.yml --stack-name production-distro --parameter-overrides PipelineID="${CIRCLE_WORKFLOW_ID}"
+          aws cloudformation deploy --template-file cloudfront.yml --stack-name production-distro --parameter-overrides PipelineID="${CIRCLE_WORKFLOW_ID:0:7}"
   clean_up_old_front_end:
     docker:
       - image: amazon/aws-cli
@@ -146,7 +146,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/
-      - run: PreviousPipelineID = `cat ~/output.txt`
+      - run: PreviousPipelineID = `cat ~/lastDeployId.txt`
       - run: |
           aws s3 rm "s3://${PreviousPipelineID}" --recursive
           aws cloudformation delete-stack --stack-name "${PreviousPipelineID}"
