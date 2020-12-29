@@ -148,7 +148,7 @@ jobs:
       - run: yum -y install tar gzip
       - attach_workspace:
           at: ~/
-      - run: PreviousPipelineID = `cat ~/lastDeployId.txt`
+      - run: PreviousPipelineID=`cat ~/lastDeployId.txt`
       - run: |
           aws s3 rm "s3://${PreviousPipelineID}" --recursive
           aws cloudformation delete-stack --stack-name "${PreviousPipelineID}"
