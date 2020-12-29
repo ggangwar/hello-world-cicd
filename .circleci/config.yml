@@ -117,9 +117,9 @@ jobs:
       - run: |
           aws cloudformation deploy \
             --template-file bucket.yml \
-            --stack-name "${CIRCLE_WORKFLOW_ID:0:7}" \
-            --parameter-overrides NAME="${CIRCLE_WORKFLOW_ID:0:7}"
-      - run: aws s3 sync . s3://"${CIRCLE_WORKFLOW_ID:0:7}" --delete
+            --stack-name "cicd-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --parameter-overrides NAME="cicd-${CIRCLE_WORKFLOW_ID:0:7}"
+      - run: aws s3 sync . s3://"cicd-${CIRCLE_WORKFLOW_ID:0:7}" --delete
   get_last_deployment_id:
     docker:
       - image: amazon/aws-cli
@@ -138,7 +138,7 @@ jobs:
     steps:
       - checkout
       - run: |
-          aws cloudformation deploy --template-file cloudfront.yml --stack-name production-distro --parameter-overrides PipelineID="${CIRCLE_WORKFLOW_ID:0:7}"
+          aws cloudformation deploy --template-file cloudfront.yml --stack-name production-distro --parameter-overrides PipelineID="cicd-${CIRCLE_WORKFLOW_ID:0:7}"
   clean_up_old_front_end:
     docker:
       - image: amazon/aws-cli
@@ -169,7 +169,9 @@ workflows:
       #    requires:
       #     - create_infrastructure
       - get_last_deployment_id
-      - create_and_deploy_front_end
+      - create_and_deploy_front_end:
+          requires:
+            - get_last_deployment_id
       - promote_to_production:
           requires:
             - create_and_deploy_front_end
