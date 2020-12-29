@@ -114,6 +114,7 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - run: yum -y install tar gzip
       - run: |
           aws cloudformation deploy \
             --template-file bucket.yml \
