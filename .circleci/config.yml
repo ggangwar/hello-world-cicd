@@ -148,16 +148,15 @@ jobs:
       - run: yum -y install tar gzip
       - attach_workspace:
           at: ~/
-      - run: sed -n 2p ~/lastDeployId.txt
       - run: |
           PreviousPipelineID=`cat ~/lastDeployId.txt`
           aws s3 rm "s3://${PreviousPipelineID}" --recursive
           aws cloudformation delete-stack --stack-name "${PreviousPipelineID}"
 
 workflows:
-  welcome:
+  cicd:
     jobs:
-      - welcome/run
+      #- welcome/run
       #- print_hello_world
       #- print_owner
       #- save_hello_world_output
@@ -172,12 +171,12 @@ workflows:
       #    requires:
       #     - create_infrastructure
       - get_last_deployment_id
-      # - create_and_deploy_front_end:
-      #     requires:
-      #       - get_last_deployment_id
-      # - promote_to_production:
-      #     requires:
-      #       - create_and_deploy_front_end
-      - clean_up_old_front_end:
+      - create_and_deploy_front_end:
           requires:
             - get_last_deployment_id
+      - promote_to_production:
+          requires:
+            - create_and_deploy_front_end
+      - clean_up_old_front_end:
+          requires:
+            - promote_to_production
