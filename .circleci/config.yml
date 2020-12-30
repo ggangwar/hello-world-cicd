@@ -1,3 +1,6 @@
+#https://github.com/CircleCI-Public/slack-orb/wiki/Setup
+#https://circleci.com/docs/2.0/contexts/#creating-and-using-a-context
+#https://api.slack.com/apps/A01HRKSRL3D/oauth?
 version: 2.1
 orbs:
   welcome: circleci/welcome-orb@0.4.1
